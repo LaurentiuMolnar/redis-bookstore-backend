@@ -1,16 +1,27 @@
+import * as path from 'node:path';
+
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Runtime as LambdaRuntime } from 'aws-cdk-lib/aws-lambda';
+
+console.log('cwd: ', process.cwd());
 
 export class RedisBookstoreStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const booksService = new NodejsFunction(this, 'books-service', {
+      runtime: LambdaRuntime.NODEJS_16_X,
+      memorySize: 1024,
+      handler: 'handler',
+      entry: path.resolve(process.cwd(), 'src', 'books-service', 'index.ts'),
+      functionName: 'books-service',
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'InfraQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new cdk.CfnOutput(this, 'books-service-url', {
+      value: booksService.functionName,
+      exportName: 'books-service-url',
+    });
   }
 }
