@@ -5,40 +5,35 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   aws_cdk:
     runs-on: ubuntu-latest
     steps:
-      - name: cdk diff
-        uses: youyo/aws-cdk-github-actions@v2
-        with:
-          cdk_subcommand: 'diff'
-          actions_comment: false
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      - name: Checkout
+        uses: actions/checkout@v2.4.2
 
-      - name: cdk deploy
-        uses: youyo/aws-cdk-github-actions@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          cdk_subcommand: 'deploy'
-          cdk_stack: 'RedisBookstoreStack'
-          cdk_version: '2.37.1'
-          cdk_args: '--require-approval never'
-          actions_comment: false
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
 
-      - name: cdk synth
-        uses: youyo/aws-cdk-github-actions@v2
-        with:
-          cdk_subcommand: 'synth'
-          cdk_version: '2.37.1'
-          working_dir: '.'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      - name: Install Node.js
+        run: 'sudo apt update -y && curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh && sudo bash /tmp/nodesource_setup.sh && sudo apt install nodejs -y && node -v && npm i -g npm && npm -v'
+
+      - name: Install AWS CDK
+        run: 'npm i -g aws-cdk'
+
+      - name: Install project dependencies
+        run: 'npm ci && npm ls'
+
+      - name: CDK Synth
+        run: 'cdk synth'
+        working-directory: '.'
+
+      - name: CDK Deploy
+        run: 'cdk deploy'
+        working-directory: '.'
