@@ -2,18 +2,18 @@
   "name": "redis-bookstore-backend",
   "version": "0.1.0",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest",
-    "cdk": "cdk"
+    "start": "nodemon ./dist/gateway/index.js",
+    "build": "./build.js",
+    "build:watch": "./build.js --watch",
+    "build:w": "./build.js --watch",
+    "test": "jest"
   },
+  "type": "module",
   "devDependencies": {
     "@types/node": "^18.7.1",
     "@types/prettier": "^2.6.0",
-    "@types/source-map-support": "^0.5.4",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
-    "aws-cdk": "2.37.1",
     "esbuild": "^0.15.1",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
@@ -23,9 +23,9 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@types/aws-lambda": "^8.10.102",
-    "aws-cdk-lib": "2.37.1",
-    "constructs": "^10.0.0",
-    "source-map-support": "^0.5.21"
+    "concurrently": "^7.3.0",
+    "fastify": "^4.4.0",
+    "nodemon": "^2.0.19",
+    "rimraf": "^3.0.2"
   }
 }
