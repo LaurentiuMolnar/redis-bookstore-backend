@@ -1,0 +1,27 @@
+export const bookGenres = [
+  'Fantasy',
+  'Adventure',
+  'Romance',
+  'Contemporary',
+  'Dystopian',
+  'Mystery',
+  'Horror',
+  'Thriller',
+  'Paranormal',
+  'Historical Fiction',
+  'Science Fiction',
+  `Children's`,
+  'Memoir',
+  'Cookbook',
+  'Art',
+  'Self-help',
+  'Development',
+  'Motivational',
+  'Health',
+  'History',
+  'Travel',
+  'Families & Relationships',
+  'Humor',
+] as const;
+
+export const streamKey = 'events';
