@@ -20,6 +20,8 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
+    "allowSyntheticDefaultImports": true,
+    "emitDeclarationOnly": true,
     "typeRoots": [
       "./node_modules/@types"
     ]

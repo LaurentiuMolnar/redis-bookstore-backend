@@ -14,7 +14,7 @@ const rm = promisify(rimraf);
 const srcDir = 'src';
 const outputDir = 'dist';
 
-const services = await fs.readdir(path.resolve(srcDir));
+// const services = ;
 
 const isWatchMode = process.argv?.[2]?.trim() === '--watch';
 
@@ -27,8 +27,11 @@ try {
   await rm(path.resolve(outputDir));
 
   await esbuild.build({
-    entryPoints: services.map((service) =>
-      path.resolve('src', service, 'index.ts')
+    entryPoints: ((services) =>
+      services.map((service) => path.resolve('src', service, 'index.ts')))(
+      (
+        await fs.readdir(path.resolve(srcDir))
+      ).filter((serviceName) => serviceName !== 'shared')
     ),
     platform: 'node',
     bundle: true,

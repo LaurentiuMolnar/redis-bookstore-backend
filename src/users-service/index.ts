@@ -2,7 +2,8 @@ import { commandOptions, createClient } from 'redis';
 
 import { streamKey } from '../shared/constants';
 import { getConnectionUrl } from '../shared/redis';
-import { EventType } from '../shared/events';
+import type { EventType } from '../shared/events';
+import type { UserWithPassword } from '../shared/types';
 
 const client = createClient({ url: getConnectionUrl() });
 process.on('SIGINT', async () => {
@@ -15,8 +16,8 @@ process.on('SIGINT', async () => {
   process.exit(1);
 });
 
-const groupName = 'books-service';
-const consumerName = `node-1`;
+const groupName = 'users-service';
+const consumerName = 'node-1';
 
 await client.connect();
 
@@ -61,15 +62,23 @@ while (true) {
       } = event;
 
       switch (message.eventType as EventType) {
-        case 'books:create': {
-          const book = JSON.parse(message.payload);
-          await client.json.set(`books:${book.id}`, '$', book);
-          await client.xAck(streamKey, groupName, id);
-          break;
-        }
-        case 'authors:create': {
-          const author = JSON.parse(message.payload);
-          await client.json.set(`authors:${author.id}`, '$', author);
+        case 'users:create': {
+          const {
+            id: userId,
+            passwordHash,
+            ...user
+          } = JSON.parse(message.payload) as UserWithPassword;
+          const idKey = `users:id:${userId}`;
+          const emailKey = `users:email:${user.email}`;
+
+          await Promise.all([
+            ...Object.entries(user).map(([field, value]) =>
+              client.hSet(idKey, field, value)
+            ),
+            client.hSet(emailKey, 'passwordHash', passwordHash),
+            client.hSet(emailKey, 'id', userId),
+          ]);
+
           await client.xAck(streamKey, groupName, id);
           break;
         }

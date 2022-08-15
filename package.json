@@ -4,6 +4,8 @@
   "scripts": {
     "start": "nodemon ./dist/api-gateway/index.js",
     "start:books": "nodemon ./dist/books-service/index.js",
+    "start:users": "nodemon ./dist/users-service/index.js",
+    "start:services": "concurrently \"npm run start:books\" \"npm run start:users\"",
     "build": "./build.js",
     "build:watch": "./build.js --watch",
     "build:w": "./build.js --watch",
@@ -11,6 +13,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
     "@types/node": "^18.7.1",
     "@types/prettier": "^2.6.0",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
@@ -24,6 +27,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "concurrently": "^7.3.0",
     "cuid": "^2.1.8",
     "fastify": "^4.4.0",

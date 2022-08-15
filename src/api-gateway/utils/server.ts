@@ -1,11 +1,15 @@
 import fastify from 'fastify';
+import { authEndpoint } from '../routes/auth';
 import { booksEndpoint } from '../routes/books';
+import { usersEndpoint } from '../routes/users';
 
 const signals = ['SIGTERM', 'SIGINT'] as const;
 
 const server = fastify();
 
 server.register(booksEndpoint, { prefix: '/api/books' });
+server.register(usersEndpoint, { prefix: '/api/users' });
+server.register(authEndpoint, { prefix: '/api/auth' });
 
 export async function startServer() {
   server.listen({ port: 8080 }, (error, address) => {
