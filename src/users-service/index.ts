@@ -72,9 +72,10 @@ while (true) {
           const emailKey = `users:email:${user.email}`;
 
           await Promise.all([
-            ...Object.entries(user).map(([field, value]) =>
-              client.hSet(idKey, field, value)
-            ),
+            client.json.set(idKey, '$', {
+              id: userId,
+              ...user,
+            }),
             client.hSet(emailKey, 'passwordHash', passwordHash),
             client.hSet(emailKey, 'id', userId),
           ]);

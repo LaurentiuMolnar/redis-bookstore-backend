@@ -49,14 +49,17 @@ export const authEndpoint: RouteFunction = async (app, _, done) => {
       }
 
       const sessionId = createSessionId();
+      const expirationTs = Date.now() + 1 * 60 * 1000;
       await client.set(`sessions:${sessionId}`, user.id, {
-        PXAT: Date.now() + 1 * 60 * 60 * 1000,
+        PXAT: expirationTs,
       });
       await client.quit();
 
       res.status(200);
       res.headers({
-        'Set-Cookie': `sessionId=${sessionId}; Http-Only; Path=/`,
+        'Set-Cookie': `sessionId=${sessionId}; Http-Only; Path=/; Expires=${new Date(
+          expirationTs
+        ).toUTCString()}`,
       });
       return {
         message: 'Success',

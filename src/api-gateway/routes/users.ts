@@ -20,8 +20,46 @@ type CreateUserPayload = {
 };
 
 export const usersEndpoint: RouteFunction = async (app, _, done) => {
-  app.get('/me', async (req, res) => {
-    return 'Hello, user!';
+  app.get('/me', async (req, res): Promise<Response<undefined | User>> => {
+    const cookies =
+      req.headers?.['cookie']?.split(';').reduce((acc, cookieString) => {
+        const [name, value] = cookieString.split('=');
+        return {
+          ...acc,
+          [name.trim()]: value.trim(),
+        };
+      }, {} as Record<string, string>) ?? {};
+
+    if (cookies['sessionId']) {
+      const client = createClient({ url: getConnectionUrl() });
+      await client.connect();
+
+      const userId = await client.get(`sessions:${cookies['sessionId']}`);
+
+      if (!userId) {
+        res.status(401);
+        return {
+          message: 'Unauthorized',
+          payload: undefined,
+        };
+      }
+
+      const user = (await client.json.get(`users:id:${userId}`)) as User;
+
+      await client.quit();
+
+      res.status(200);
+      return {
+        message: 'Success',
+        payload: user,
+      };
+    }
+
+    res.status(401);
+    return {
+      message: 'Unauthorized',
+      payload: undefined,
+    };
   });
 
   app.post(
