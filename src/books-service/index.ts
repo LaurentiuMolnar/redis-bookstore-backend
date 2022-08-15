@@ -64,12 +64,12 @@ while (true) {
       switch (message.eventType as EventType) {
         case 'books:create': {
           const book = JSON.parse(message.payload);
-          await client.json.set(`books#${book.id}`, '$', book);
+          await client.json.set(`books:${book.id}`, '$', book);
           break;
         }
         case 'authors:create': {
           const author = JSON.parse(message.payload);
-          await client.json.set(`authors#${author.id}`, '$', author);
+          await client.json.set(`authors:${author.id}`, '$', author);
           break;
         }
       }

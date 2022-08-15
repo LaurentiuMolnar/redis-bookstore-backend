@@ -1,4 +1,4 @@
-import { createClient } from 'redis';
+import { commandOptions, createClient } from 'redis';
 import { slug } from 'cuid';
 
 import { getConnectionUrl } from '../../shared/redis';
@@ -28,6 +28,17 @@ type Author = {
   name: string;
   createdAt: number;
   updatedAt: number;
+};
+
+type SearchBooksPayload = {
+  total: number;
+  books: Array<{
+    id: string;
+    title: string;
+    authors: any[];
+    price: number;
+    imageUrl: string;
+  }>;
 };
 
 const client = createClient({
@@ -99,6 +110,49 @@ export const booksEndpoint: RouteFunction = async (app, _, done) => {
         message: 'Success',
         payload: {
           bookId,
+        },
+      };
+    }
+  );
+
+  app.get(
+    '/',
+    async (
+      req: FastifyRequest<{ Querystring: { q?: string } }>,
+      res
+    ): Promise<Response<SearchBooksPayload>> => {
+      const { q } = req.query;
+
+      res.status(200);
+
+      const response = await client.ft.search(
+        commandOptions({ isolated: true }),
+        'idx:books',
+        q ? `@title|summary:${q}` : '*',
+        {
+          SORTBY: {
+            BY: 'title',
+            DIRECTION: 'ASC',
+          } as any,
+        }
+      );
+
+      return {
+        message: 'Success',
+        payload: {
+          total: response.total,
+          books: response.documents.map(({ id, value: { $ } }) => {
+            const bookJson = JSON.parse(
+              $ as string
+            ) as SearchBooksPayload['books'][number];
+            return {
+              id: bookJson.id,
+              authors: bookJson.authors,
+              imageUrl: bookJson?.imageUrl ?? '',
+              price: bookJson.price,
+              title: bookJson.title,
+            };
+          }),
         },
       };
     }
